@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../pages/home_page.dart';
 import '../pages/profile_page.dart';
+import '../services/budget_service.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -44,7 +45,11 @@ class _HomeState extends State<Home> {
                 showDialog(
                     context: context,
                     builder: (context) {
-                      return AddBudgetDialog(budgetToAdd: (budget) {});
+                      return AddBudgetDialog(budgetToAdd: (budget) {
+                        final budgetService =
+                            Provider.of<BudgetService>(context, listen: false);
+                        budgetService.budget = budget;
+                      });
                     });
               },
               icon: const Icon(Icons.attach_money))

@@ -11,13 +11,13 @@ class ThemeService with ChangeNotifier {
   }
 }
 
-class BudgetService extends ChangeNotifier {
-  double _budget = 2000.0;
+// class BudgetService extends ChangeNotifier {
+//   double _budget = 2000.0;
 
-  double get budget => _budget;
+//   double get budget => _budget;
 
-  set budget(double value) {
-    _budget = value;
-    notifyListeners();
-  }
-}
+//   set budget(double value) {
+//     _budget = value;
+//     notifyListeners();
+//   }
+// }

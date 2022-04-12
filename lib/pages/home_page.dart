@@ -3,6 +3,9 @@ import 'package:budget_tracker/model/transaction_item.dart';
 import 'package:flutter/services.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import '../services/budget_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -16,7 +19,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final budgetService = Provider.of<BudgetService>(context);
     final screenSize = MediaQuery.of(context).size;
+    final formatter = new NumberFormat("#,##0.00", "pt_BR");
+    // String newText = "R\$ " + formatter.format(value / 100);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: (() {
@@ -29,10 +35,6 @@ class _HomePageState extends State<HomePage> {
                   });
                 });
               });
-          // setState(() {
-          //   items.add(TransactionItem(
-          //       amount: 5.99, itemTitle: "Food", isExpense: true));
-          // });
         }),
         child: const Icon(Icons.add),
       ),
@@ -44,29 +46,36 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: CircularPercentIndicator(
-                    radius: screenSize.width / 4,
-                    lineWidth: 10.0, // how thick the line is
-                    percent: .5, // percent goes from 0 -> 1
-                    backgroundColor: Colors.white,
-                    center: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Text(
-                          "\Rp 0",
-                          style: TextStyle(
-                              fontSize: 48, fontWeight: FontWeight.bold),
+                Center(
+                  child: Consumer<BudgetService>(
+                    builder: ((context, value, child) {
+                      return CircularPercentIndicator(
+                        radius: screenSize.width / 4,
+                        lineWidth: 10.0,
+                        percent: .5,
+                        backgroundColor: Colors.white,
+                        center: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              "\Rp 0",
+                              style: TextStyle(
+                                  fontSize: 48, fontWeight: FontWeight.bold),
+                            ),
+                            const Text(
+                              "Balance",
+                              style: TextStyle(fontSize: 18),
+                            ),
+                            Text(
+                              "Budget: \Rp " +
+                                  formatter.format(value.budget).toString(),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
                         ),
-                        Text(
-                          "Balance",
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ],
-                    ),
-
-                    progressColor: Theme.of(context).colorScheme.primary,
+                        progressColor: Theme.of(context).colorScheme.primary,
+                      );
+                    }),
                   ),
                 ),
                 const SizedBox(
