@@ -15,13 +15,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<TransactionItem> items = [];
-
   @override
   Widget build(BuildContext context) {
     final budgetService = Provider.of<BudgetService>(context);
     final screenSize = MediaQuery.of(context).size;
-    final formatter = new NumberFormat("#,##0.00", "pt_BR");
+    final formatter = NumberFormat("#,##0", "pt_BR");
     // String newText = "R\$ " + formatter.format(value / 100);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -30,9 +28,9 @@ class _HomePageState extends State<HomePage> {
               context: context,
               builder: (context) {
                 return AddTransactionDialog(itemToAdd: (transactionItem) {
-                  setState(() {
-                    items.add(transactionItem);
-                  });
+                  final budgetService =
+                      Provider.of<BudgetService>(context, listen: false);
+                  budgetService.addItem(transactionItem);
                 });
               });
         }),
@@ -52,14 +50,15 @@ class _HomePageState extends State<HomePage> {
                       return CircularPercentIndicator(
                         radius: screenSize.width / 4,
                         lineWidth: 10.0,
-                        percent: .5,
+                        percent: value.balance / value.budget,
                         backgroundColor: Colors.white,
                         center: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              "\Rp 0",
-                              style: TextStyle(
+                            Text(
+                              "\Rp " + value.balance.toString().split(".")[0],
+                              // formatter.format(value.balance).toString().split(".")[0],
+                              style: const TextStyle(
                                   fontSize: 48, fontWeight: FontWeight.bold),
                             ),
                             const Text(
@@ -68,7 +67,8 @@ class _HomePageState extends State<HomePage> {
                             ),
                             Text(
                               "Budget: \Rp " +
-                                  formatter.format(value.budget).toString(),
+                                  // formatter.format(value.budget).toString(),
+                                  value.budget.toString(),
                               style: const TextStyle(fontSize: 12),
                             ),
                           ],
@@ -88,12 +88,19 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(
                   height: 10,
                 ),
-                ...List.generate(
-                    items.length,
-                    (index) => TransactionCard(
-                          item: items[index],
-                        )), // TransactionCard(text: "Kopi", amount: 10000, isExpense: true),
-                // TransactionCard(text: "Kopi", amount: 10000, isExpense: true),
+                Consumer<BudgetService>(
+                  builder: ((context, value, child) {
+                    return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: value.items.length,
+                        physics: const ClampingScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return TransactionCard(
+                            item: value.items[index],
+                          );
+                        });
+                  }),
+                ),
               ],
             ),
           ),
