@@ -20,7 +20,7 @@ class ThemeService with ChangeNotifier {
   }
 }
 
-// class BudgetService extends ChangeNotifier {
+// class BudgetViewModel extends ChangeNotifier {
 //   double _budget = 2000.0;
 
 //   double get budget => _budget;

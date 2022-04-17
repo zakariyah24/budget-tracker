@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../services/budget_service.dart';
 
 class HomePage extends StatefulWidget {
@@ -17,9 +16,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    final budgetService = Provider.of<BudgetService>(context);
     final screenSize = MediaQuery.of(context).size;
-    final formatter = NumberFormat("#,##0", "pt_BR");
+    // final formatter = NumberFormat("#,##0", "pt_BR");
     // String newText = "R\$ " + formatter.format(value / 100);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -29,7 +27,7 @@ class _HomePageState extends State<HomePage> {
               builder: (context) {
                 return AddTransactionDialog(itemToAdd: (transactionItem) {
                   final budgetService =
-                      Provider.of<BudgetService>(context, listen: false);
+                      Provider.of<BudgetViewModel>(context, listen: false);
                   budgetService.addItem(transactionItem);
                 });
               });
@@ -45,18 +43,28 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Center(
-                  child: Consumer<BudgetService>(
+                  child: Consumer<BudgetViewModel>(
                     builder: ((context, value, child) {
+                      final balance = value.getBalance();
+                      final budget = value.getBudget();
+                      double percentage = balance / budget;
+
+                      if (percentage < 0) {
+                        percentage = 0;
+                      }
+                      if (percentage > 0) {
+                        percentage = 1;
+                      }
                       return CircularPercentIndicator(
                         radius: screenSize.width / 4,
                         lineWidth: 10.0,
-                        percent: value.balance / value.budget,
+                        percent: percentage,
                         backgroundColor: Colors.white,
                         center: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              "\Rp " + value.balance.toString().split(".")[0],
+                              "Rp " + balance.toString().split(".")[0],
                               // formatter.format(value.balance).toString().split(".")[0],
                               style: const TextStyle(
                                   fontSize: 48, fontWeight: FontWeight.bold),
@@ -66,9 +74,9 @@ class _HomePageState extends State<HomePage> {
                               style: TextStyle(fontSize: 18),
                             ),
                             Text(
-                              "Budget: \Rp " +
+                              "Budget: Rp " +
                                   // formatter.format(value.budget).toString(),
-                                  value.budget.toString(),
+                                  budget.toString(),
                               style: const TextStyle(fontSize: 12),
                             ),
                           ],
@@ -88,7 +96,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(
                   height: 10,
                 ),
-                Consumer<BudgetService>(
+                Consumer<BudgetViewModel>(
                   builder: ((context, value, child) {
                     return ListView.builder(
                         shrinkWrap: true,
@@ -138,7 +146,7 @@ class TransactionCard extends StatelessWidget {
           children: [
             Text(
               item.itemTitle,
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18),
             ),
             const Spacer(),
             Text(
